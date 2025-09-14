@@ -18,17 +18,49 @@ export default function TaskItem({ task, onToggle }) {
     ); 
 } 
 const styles = StyleSheet.create({ 
-card: { padding: 14, borderRadius: 12, backgroundColor: '#fff', 
-marginBottom: 10, flexDirection: 'row', alignItems: 'center', 
-elevation: 1 }, 
-cardDone: { backgroundColor: '#f1f5f9' }, 
-title: { fontSize: 16, fontWeight: '600', marginBottom: 4 }, 
-strike: { textDecorationLine: 'line-through', color: '#64748b' }, 
-desc: { color: '#475569', marginBottom: 6 }, 
-meta: { fontSize: 12, color: '#64748b' }, 
-badge: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, 
-marginLeft: 12 }, 
-badgePending: { backgroundColor: '#fee2e2' }, 
-badgeDone: { backgroundColor: '#dcfce7' }, 
-badgeText: { fontWeight: '700', fontSize: 12 }, 
+    card: { 
+        padding: 14, 
+        borderRadius: 12, 
+        backgroundColor: '#fff', 
+        marginBottom: 10, 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        elevation: 1 
+    }, 
+    cardDone: { 
+        backgroundColor: '#f1f5f9' 
+    }, 
+    title: { 
+        fontSize: 16, 
+        fontWeight: '600', 
+        marginBottom: 4 
+    }, 
+    strike: { 
+        textDecorationLine: 'line-through',
+        color: '#64748b' 
+    }, 
+    desc: { 
+        color: '#475569', 
+        marginBottom: 6 
+    }, 
+    meta: { 
+        fontSize: 12, 
+        color: '#64748b' 
+    }, 
+    badge: { 
+        paddingVertical: 6, 
+        paddingHorizontal: 10, 
+        borderRadius: 8, 
+        marginLeft: 12 
+    }, 
+    badgePending: { 
+        backgroundColor: '#fee2e2' 
+    }, 
+    badgeDone: { 
+        backgroundColor: '#dcfce7' 
+    }, 
+    badgeText: { 
+        fontWeight: '700', 
+        fontSize: 12 
+    }, 
 }); 
