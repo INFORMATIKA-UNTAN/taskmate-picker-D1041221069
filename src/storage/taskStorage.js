@@ -3,7 +3,7 @@ const STORAGE_KEY = 'TASKMATE_TASKS';
 
 export async function saveTasks(tasks) { 
     try { 
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); 
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     } catch (e) { 
         console.error('Gagal menyimpan:', e); 
     } 

@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     marginLeft: 12 
   }, 
   badgePending: { backgroundColor: '#fdba74' },   // orange 
-  badgeTodo: { backgroundColor: '#fee2e2' },     // pink 
+  badgeTodo: { backgroundColor: '#ed3131ff' },     // pink 
   badgeDone: { backgroundColor: '#dcfce7' },     // green 
   badgeText: { fontWeight: '700', fontSize: 12 }, 
 }); 

@@ -12,7 +12,7 @@ export default function HomeScreen() {
     const [tasks, setTasks] = useState([]); 
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedStatus, setSelectedStatus] = useState('All');
-
+    
     useEffect(() => {
         (async () => {
         const data = await loadTasks();
