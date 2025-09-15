@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default function StatusFilter({ selected, onSelect }) {
-  const statuses = ['All', 'ToDo', 'Done'];
+  const statuses = ['All', 'Pending' ,'Todo', 'Done'];
 
   return (
     <View style={styles.container}>

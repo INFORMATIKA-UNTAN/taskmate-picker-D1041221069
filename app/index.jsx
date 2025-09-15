@@ -1,55 +1,104 @@
-import { useMemo, useState } from 'react'; 
+import { useMemo, useState, useEffect, useCallback} from 'react';
+import { useFocusEffect } from 'expo-router';
 import { SafeAreaView, StyleSheet, Text, FlatList, View, TouchableOpacity} from 'react-native'; 
 import TaskItem from '../src/components/Taskitem.jsx';
+import { loadTasks, saveTasks } from '../src/storage/taskStorage.js';
+
+import { dummyTasks } from '../src/data/dummyTasks.js';
 import StatusFilter from '../src/components/StatusFilter.jsx';
 import CategoryFilter from '../src/components/CategoryFilter.jsx';
-import { dummyTasks } from '../src/data/dummyTasks.js';
 
 export default function HomeScreen() { 
-    const [tasks, setTasks] = useState(dummyTasks); 
+    const [tasks, setTasks] = useState([]); 
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedStatus, setSelectedStatus] = useState('All');
 
-    const handleToggle = (task) => { 
-        setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: t.status === 'done' ? 'pending' : 'done' } : t)); 
+    useEffect(() => {
+        (async () => {
+        const data = await loadTasks();
+        setTasks(data);
+        })();
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            (async () => {
+            const data = await loadTasks();
+            setTasks(data);
+            })();
+        }, [])
+    );
+
+    const handleToggle = async (task) => {
+        const updated = tasks.map((t) => {
+            if (t.id === task.id) {
+                let newStatus;
+                if (t.status === 'Pending') {
+                    newStatus = 'Todo';
+                } else if (t.status === 'Todo') {
+                    newStatus = 'Done';
+                } else {
+                    newStatus = 'Pending'; // kalau status Done, balik ke Pending
+                }
+                return { ...t, status: newStatus };
+            }
+            return t;
+        });
+        setTasks(updated);
+        await saveTasks(updated);
     };
 
-    const categories = useMemo(()=>{
+
+    const handleDelete = async (task) => {
+        const updated = tasks.filter((t) => t.id !== task.id);
+        setTasks(updated);
+        await saveTasks(updated);
+    };
+
+    const categories = useMemo(() => {
         const categorySet = new Set();
-        dummyTasks.forEach(
-            task => categorySet.add(task.category)
-        )
+        tasks.forEach(task => categorySet.add(task.category));
         return ['All', ...Array.from(categorySet)];
-    },[])
+    }, [tasks]);
+
 
     const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
-        const matchCategory = selectedCategory === 'All' || task.category === selectedCategory;
-        const matchStatus =
-        selectedStatus === 'All' ||
-        (selectedStatus === 'Done' && task.status === 'done') ||
-        (selectedStatus === 'ToDo' && task.status === 'pending');
-        return matchCategory && matchStatus;
-    });
+        return tasks.filter(task => {
+            const matchCategory = selectedCategory === 'All' || task.category === selectedCategory;
+            const matchStatus =
+            selectedStatus === 'All' ||
+            (selectedStatus === 'Done' && task.status === 'Done') ||
+            (selectedStatus === 'Todo' && task.status === 'Todo') ||
+            (selectedStatus === 'Pending' && task.status === 'Pending');
+            return matchCategory && matchStatus;
+        });
     }, [selectedCategory, selectedStatus, tasks]);
 
 return ( 
     <SafeAreaView style={styles.container}>
     <Text style={styles.header}>TaskMate – Daftar Tugas</Text>
+    <StatusFilter
+        selected={selectedStatus}
+        onSelect={setSelectedStatus}
+    />
     <CategoryFilter 
         categories={categories} 
         selected={selectedCategory} 
         onSelect={setSelectedCategory} 
     />
-    <StatusFilter
-        selected={selectedStatus}
-        onSelect={setSelectedStatus}
-    />
     <FlatList 
         data={filteredTasks} 
-        keyExtractor={(item) => item.id} 
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ padding: 16 }} 
-        renderItem={({ item }) => <TaskItem task={item} onToggle={handleToggle} />} 
+        renderItem={({ item }) => 
+        < TaskItem 
+            task={item} 
+            onToggle={handleToggle}
+            onDelete={handleDelete} 
+        />}
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center' }}>Tidak ada tugas</Text>
+        }
     />
     </SafeAreaView>
 ); 
