@@ -18,4 +18,12 @@ export async function loadTasks() {
         console.error('Gagal membaca:', e); 
         return []; 
     } 
-} 
+}
+
+export const clearTasks = async () => {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    console.error('Failed to clear tasks', e);
+  }
+};

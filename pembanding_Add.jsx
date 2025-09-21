@@ -1,52 +1,54 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { loadTasks, saveTasks } from '../src/storage/taskStorage';
-import { v4 as uuidv4 } from 'uuid';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { v4 as uuidv4 } from 'uuid';
+import { loadTasks, saveTasks } from '../src/storage/taskStorage';
+import { loadCategories, saveCategories } from '../src/storage/categoryStorage';
 import { Picker } from '@react-native-picker/picker';
+import AddCategoryModal from '../src/components/AddCategoryModal';
 import { pickColor } from '../src/constants/categories';
 import { PRIORITIES } from '../src/constants/priorities';
-import { saveCategories, loadCategories } from '../src/storage/categoryStorage';
-import AddCategoryModal from '../src/components/AddCategoryModal.jsx';
 
 export default function Add() {
   const router = useRouter();
 
+  // [UPDATE] state tambahan: kategori & prioritas
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [deadline, setDeadline] = useState('2025-09-14');
+
   const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState('Umum');
   const [showCatModal, setShowCatModal] = useState(false);
+
   const [priority, setPriority] = useState('Low');
 
+  // [BARU] Muat kategori dinamis dari storage
   useEffect(() => {
-    (async () => {
-      const cats = await loadCategories();
-      setCategories(cats);
-    })();
+    (async () => setCategories(await loadCategories()))();
   }, []);
 
-  const handleAdd = async () => {
+  const handleAdd = async () => 
+    {
     if (!title.trim()) {
-      Alert.alert('Error', 'Judul tugas tidak boleh kosong!');
+      Alert.alert('Error', 'Judul wajib diisi!');
       return;
     }
 
     const tasks = await loadTasks();
+    // [UPDATE] simpan category & priority dalam task
     const newTask = {
       id: uuidv4(),
       title,
       description: desc,
-      category,
       deadline,
+      category,
       priority,
-      status: 'Pending',
+      status: 'pending',
     };
+    await saveTasks([...tasks, newTask]);
 
-    const updated = [...tasks, newTask];
-    await saveTasks(updated);
-
+    // [RESET] form
     setTitle('');
     setDesc('');
     setDeadline('2025-09-14');
@@ -54,6 +56,8 @@ export default function Add() {
     setPriority('Low');
     router.replace('/');
   };
+
+  // [BARU] terima kategori baru dari modal
   const onSubmitCategory = async ({ key, color }) => {
     if (categories.some(c => c.key.toLowerCase() === key.toLowerCase())) {
       Alert.alert('Info', 'Kategori sudah ada.');
@@ -66,7 +70,7 @@ export default function Add() {
     setCategory(key); // [UX] pilih otomatis kategori baru
     setShowCatModal(false);
   };
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tambah Tugas</Text>
@@ -90,12 +94,13 @@ export default function Add() {
 
       <Text style={styles.label}>Deadline (YYYY-MM-DD)</Text>
       <TextInput
-        style={[styles.input]}
+        style={styles.input}
         value={deadline}
         onChangeText={setDeadline}
         placeholder="2025-09-14"
       />
 
+      {/* [UPDATE] Picker kategori dinamis + tombol tambah */}
       <Text style={styles.label}>Kategori</Text>
       <View style={styles.pickerWrap}>
         <Picker
@@ -111,6 +116,7 @@ export default function Add() {
         </Picker>
       </View>
 
+      {/* [UPDATE] Picker prioritas */}
       <Text style={styles.label}>Prioritas</Text>
       <View style={styles.pickerWrap}>
         <Picker selectedValue={priority} onValueChange={setPriority}>
@@ -118,11 +124,10 @@ export default function Add() {
         </Picker>
       </View>
 
-      {/* Tombol custom */}
-      <TouchableOpacity style={styles.button} onPress={handleAdd}>
-        <Text style={styles.buttonText}>Simpan Tugas</Text>
-      </TouchableOpacity>
+      {/* [AKSI] Simpan */}
+      <Button title="Simpan Tugas" onPress={handleAdd} />
 
+      {/* [BARU] Modal tambah kategori */}
       <AddCategoryModal
         visible={showCatModal}
         onClose={() => setShowCatModal(false)}
@@ -134,58 +139,9 @@ export default function Add() {
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    padding: 20, 
-    backgroundColor: '#f8fafc' 
-  },
-  title: { 
-    fontSize: 22, 
-    fontWeight: '700', 
-    marginBottom: 20, 
-    textAlign: 'center',
-    color: '#1e293b'
-  },
-  label: { 
-    marginTop: 16, 
-    fontWeight: '600',
-    fontSize: 14,
-    color: '#334155'
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 8,
-    backgroundColor: '#fff',
-    fontSize: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  button: {
-    marginTop: 24,
-    backgroundColor: '#3b82f6',
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  pickerWrap:{ 
-    borderWidth:1, 
-    borderColor:'#cbd5e1', 
-    borderRadius:8, 
-    marginTop:6, 
-    backgroundColor:'#fff' 
-  },
+  container:{ flex:1, padding:20, backgroundColor:'#fff' },
+  title:{ fontSize:18, fontWeight:'700', marginBottom:12 },
+  label:{ marginTop:12, fontWeight:'600' },
+  input:{ borderWidth:1, borderColor:'#cbd5e1', borderRadius:8, padding:10, marginTop:6 },
+  pickerWrap:{ borderWidth:1, borderColor:'#cbd5e1', borderRadius:8, marginTop:6, backgroundColor:'#fff' },
 });
